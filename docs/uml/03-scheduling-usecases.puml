@@ -7,7 +7,7 @@ package Users {
     actor AdministrativeStaff 
 
 }
-note bottom of (Users) 
+note top of (Users) 
 Full predefined list of use types is mentioned in 01-actors.puml.
 Here some user groups may be generalised for visual simplicity.
 end note
@@ -19,7 +19,7 @@ package SchedulingManagement {
     usecase "Assign Classroom" as UC6
 }
 
-note bottom of (SchedulingManagement) 
+note top of (SchedulingManagement) 
 Full list of usecases is mentioned in 02-usecases.puml.
 end note
 

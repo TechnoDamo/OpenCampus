@@ -21,11 +21,11 @@ package UsecaseGroups {
     usecase "Administer System\n(user and permission management)" as UC3
 }
 
-note bottom of UserGroups
+note top of UserGroups
 High-level categories of default user type groups.
 end note
 
-note bottom of UsecaseGroups
+note top of UsecaseGroups
 High-level functional areas of the system.
 end note
 

@@ -42,7 +42,7 @@ package SelfService {
 }
 }
 
-note bottom of (usecases) 
+note top of (usecases) 
 The whole list of functions/use cases of the system.
 end note
 @enduml 
