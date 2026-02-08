@@ -6,6 +6,8 @@ The system is designed as a modular monolith built with Go and PostgreSQL, prior
 
 ## Overview
 
+**You can read README [as a webpage](https://technodamo.github.io/OpenCampus/) (advised).**
+
 Universities often rely on fragmented or legacy systems for timetable management and attendance tracking. OpenCampus provides a modern, extensible alternative that institutions can host on their own infrastructure.
 
 The platform aims to:
