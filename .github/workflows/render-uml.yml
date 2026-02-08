@@ -2,52 +2,76 @@ name: Render UML Diagrams
 
 on:
   push:
-    paths: ["docs/uml/*.puml"]
-    branches: [main, master]
+    paths:
+      - "docs/uml/*.puml"
+    branches: [ main, master ]
+  pull_request:
+    paths:
+      - "docs/uml/*.puml"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   render:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-          
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-          
-      - name: Render UML diagrams
+        
+      - name: Install Java and Graphviz
         run: |
-          mkdir -p docs/diagrams
+          sudo apt-get update
+          sudo apt-get install -y default-jre-headless graphviz wget
           
-          # Используем Docker для рендеринга
-          docker run --rm \
-            -v "$PWD/docs:/docs" \
-            plantuml/plantuml:latest \
-            -tsvg "/docs/uml/*.puml" -o "/docs/diagrams"
-          
-      - name: Configure Git
+      - name: Download latest PlantUML
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Скачиваем последнюю версию PlantUML
+          LATEST_URL=$(curl -s https://api.github.com/repos/plantuml/plantuml/releases/latest | grep "browser_download_url.*jar" | cut -d '"' -f 4)
+          wget -O plantuml.jar "$LATEST_URL"
+          echo "PLANTUML_JAR_PATH=$(pwd)/plantuml.jar" >> $GITHUB_ENV
           
-      - name: Commit and push changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check UML files
         run: |
-          # Добавляем только SVG файлы
-          git add docs/diagrams/*.svg 2>/dev/null || true
+          echo "Files in docs/uml/:"
+          ls -la docs/uml/
           
-          # Проверяем, есть ли изменения
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
+      - name: Create diagrams directory
+        run: mkdir -p docs/diagrams
+        
+      - name: Render UML to SVG with latest PlantUML
+        run: |
+          cd docs/uml
+          set +e  # Не прерывать выполнение при ошибках
+          for file in *.puml; do
+            if [ -f "$file" ]; then
+              echo "=== Rendering $file with latest PlantUML ==="
+              java -jar "${{ env.PLANTUML_JAR_PATH }}" -tsvg "$file" -o ../diagrams/
+              if [ $? -ne 0 ]; then
+                echo "Warning: Failed to render $file, continuing..."
+              fi
+            fi
+          done
+          set -e
+          
+      - name: Check rendered diagrams
+        run: |
+          echo "Rendered files in docs/diagrams/:"
+          ls -la docs/diagrams/ || echo "No diagrams directory"
+          
+      - name: Commit and push diagrams
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'actions@github.com'
+          
+          # Check if there are any SVG files to commit
+          if compgen -G "docs/diagrams/*.svg" > /dev/null; then
+            echo "Found SVG files, committing..."
+            git add docs/diagrams/*.svg
+            git diff --cached --quiet || git commit -m "🤖 Auto-generated UML diagrams (latest PlantUML)"
+            git push
           else
-            git commit -m "📊 Auto-generated UML diagrams"
-            # Используем токен для push
-            git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
-            git push origin HEAD:${{ github.ref }}
+            echo "No SVG files generated"
           fi
