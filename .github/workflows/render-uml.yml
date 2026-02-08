@@ -1,8 +1,9 @@
-name: UML Render
+name: Render UML Diagrams
 
 on:
   push:
     paths: ["docs/uml/*.puml"]
+    branches: [main, master]
   workflow_dispatch:
 
 jobs:
@@ -10,19 +11,43 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Render with Docker (latest)
-        run: |
-          docker run --rm \
-            -v $PWD/docs:/docs \
-            plantuml/plantuml:latest \
-            -tsvg /docs/uml/*.puml -o /docs/diagrams
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
           
-      - name: Auto commit
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+          
+      - name: Render UML diagrams
         run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
+          mkdir -p docs/diagrams
+          
+          # Используем Docker для рендеринга
+          docker run --rm \
+            -v "$PWD/docs:/docs" \
+            plantuml/plantuml:latest \
+            -tsvg "/docs/uml/*.puml" -o "/docs/diagrams"
+          
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+      - name: Commit and push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Добавляем только SVG файлы
           git add docs/diagrams/*.svg 2>/dev/null || true
-          git commit -m "🔄 Updated diagrams (auto generated)" || exit 0
-          git push
+          
+          # Проверяем, есть ли изменения
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "📊 Auto-generated UML diagrams"
+            # Используем токен для push
+            git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
+            git push origin HEAD:${{ github.ref }}
+          fi
