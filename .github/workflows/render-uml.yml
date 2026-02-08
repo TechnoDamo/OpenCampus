@@ -26,7 +26,8 @@ jobs:
 
       - name: Render diagrams
         run: |
-          find docs/uml -name "*.puml" -exec plantuml -tsvg {} \;
+          mkdir -p docs/diagrams
+          find docs/uml -name "*.puml" -exec plantuml -tsvg -o ../diagrams {} \;
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -34,10 +35,16 @@ jobs:
           name: diagrams
           path: docs/diagrams/*.svg
 
-      - name: Commit generated diagrams
+      - name: Commit SVG if exists
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add docs/diagrams/*.svg
-          git diff --cached --quiet || git commit -m "Update diagrams"
-          git push
+
+          if ls docs/diagrams/*.svg 1> /dev/null 2>&1; then
+            git add docs/diagrams/*.svg
+            git diff --cached --quiet || git commit -m "Update diagrams"
+            git push
+          else
+            echo "No SVG generated"
+          fi
+
