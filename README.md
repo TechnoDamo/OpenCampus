@@ -1,5 +1,5 @@
+![logo](./img/logo.png)
 # OpenCampus
-
 OpenCampus is an open-source, self-hosted platform for managing university scheduling, academic structure, and student attendance.
 
 The system is designed as a modular monolith built with Go and PostgreSQL, prioritising reliability, clear architecture, and straightforward deployment in institutional environments.
