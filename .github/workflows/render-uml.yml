@@ -26,18 +26,34 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y default-jre graphviz plantuml
           
+      - name: Check UML files
+        run: |
+          echo "Files in docs/uml/:"
+          ls -la docs/uml/
+          
       - name: Create diagrams directory
         run: mkdir -p docs/diagrams
         
       - name: Render UML to SVG
         run: |
           cd docs/uml
+          # Продолжать выполнение даже если некоторые диаграммы не рендерятся
+          set +e
           for file in *.puml; do
             if [ -f "$file" ]; then
-              echo "Rendering $file..."
+              echo "=== Rendering $file ==="
               plantuml -tsvg "$file" -o ../diagrams/
+              if [ $? -ne 0 ]; then
+                echo "Warning: Failed to render $file, continuing..."
+              fi
             fi
           done
+          set -e
+          
+      - name: Check rendered diagrams
+        run: |
+          echo "Rendered files in docs/diagrams/:"
+          ls -la docs/diagrams/ || echo "No diagrams directory"
           
       - name: Commit and push diagrams
         run: |
@@ -45,10 +61,11 @@ jobs:
           git config --global user.email 'actions@github.com'
           
           # Check if there are any SVG files to commit
-          if ls docs/diagrams/*.svg 1> /dev/null 2>&1; then
+          if compgen -G "docs/diagrams/*.svg" > /dev/null; then
+            echo "Found SVG files, committing..."
             git add docs/diagrams/*.svg
             git diff --cached --quiet || git commit -m "🤖 Auto-generated UML diagrams"
             git push
           else
-            echo "No diagrams generated"
+            echo "No SVG files generated"
           fi
