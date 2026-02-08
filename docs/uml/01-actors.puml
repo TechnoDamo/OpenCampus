@@ -1,0 +1,45 @@
+@startuml
+left to right direction
+
+package Users {
+    package Attendants {
+        actor Student
+    }
+
+    note right of Attendants: Anyone who takes classes (full-time students, extenshion schools attendants etc.)
+
+    skinparam actorStyle awesome
+    package UniversityStaff {
+        package TeachingStaff {
+            actor Lecturer
+            actor TeachingAssistant
+        }
+        note right of TeachingStaff: Everyone who teaches themselves.
+
+        package AdministrativeStaff {
+            actor Principal
+            actor FacultyHead
+            actor DepartmentHead
+            actor FacultyStaff
+        }
+        note right of AdministrativeStaff: Everyone who works at university but doesn't nesessarily have to teach themselves.
+    }
+
+    note right of UniversityStaff: Everyone who works at university
+
+
+    skinparam actorStyle Hollow 
+    package SystemAmdinistrators {
+        actor Admin
+        actor Root 
+    }
+
+    note right of SystemAmdinistrators: Technical administration of the platform. Not nesessary university staff.
+
+}
+note bottom of (Users) 
+These user groups are predefined by the system, and use cases are based on the rights given to these groups by default. 
+However, custom groups with custom rights can be created. 
+end note
+
+@enduml

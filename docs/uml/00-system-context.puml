@@ -1,0 +1,36 @@
+@startuml
+left to right direction 
+
+package UserGroups {
+
+    actor "Attendants" as at
+
+    skinparam actorStyle awesome
+    actor "University Staff" as us
+
+    skinparam actorStyle Hollow 
+    actor "System Administrators" as sa
+}
+
+package UsecaseGroups {
+
+    usecase "View Personal Academic Information\n(schedule, attendance, grades)" as UC1
+
+    usecase "Manage Academic Operations\n(scheduling, enrollment, reporting)" as UC2
+
+    usecase "Administer System\n(user and permission management)" as UC3
+}
+
+note bottom of UserGroups
+High-level categories of default user type groups.
+end note
+
+note bottom of UsecaseGroups
+High-level functional areas of the system.
+end note
+
+at --> UC1 
+us --> UC2 
+sa --> UC3
+
+@enduml

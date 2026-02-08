@@ -1,0 +1,48 @@
+@startuml
+left to right direction
+
+package usecases {
+
+package AcademicStructureManagement {
+    usecase "Create Course" as UC1
+    usecase "Create Department" as UC2
+    usecase "Manage Sections" as UC3
+}
+
+package SchedulingManagement {
+    usecase "Create Timetable" as UC4
+    usecase "Assign Lecturer" as UC5
+    usecase "Assign Classroom" as UC6
+}
+
+package AttendanceManagement {
+    usecase "Record Attendance" as UC7
+    usecase "Edit Attendance" as UC8
+    usecase "View Attendance (Staff)" as UC9
+}
+
+package EnrollmentManagement {
+    usecase "Enroll Student" as UC10
+    usecase "Remove Enrollment" as UC11
+}
+
+package Reporting {
+    usecase "Generate Attendance Report" as UC12
+}
+
+package SystemAdministration {
+    usecase "Create User" as UC13
+    usecase "Assign Role" as UC14
+    usecase "Configure Permissions" as UC15
+}
+
+package SelfService {
+    usecase "View Schedule" as UC16
+    usecase "View Own Attendance" as UC17
+}
+}
+
+note bottom of (usecases) 
+The whole list of functions/use cases of the system.
+end note
+@enduml 
