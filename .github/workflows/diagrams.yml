@@ -1,0 +1,43 @@
+name: Render UML Diagrams
+
+on:
+  push:
+    paths:
+      - "docs/**/*.puml"
+  pull_request:
+    paths:
+      - "docs/**/*.puml"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PlantUML
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y plantuml graphviz
+
+      - name: Render diagrams
+        run: |
+          find docs/diagrams -name "*.puml" -exec plantuml -tsvg {} \;
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagrams
+          path: docs/diagrams/*.svg
+
+      - name: Commit generated diagrams
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add docs/diagrams/*.svg
+          git diff --cached --quiet || git commit -m "Update diagrams"
+          git push
