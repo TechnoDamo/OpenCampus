@@ -21,18 +21,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Install Java and Graphviz
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y default-jre-headless graphviz wget
-          
-      - name: Download latest PlantUML
-        run: |
-          # Скачиваем последнюю версию PlantUML
-          LATEST_URL=$(curl -s https://api.github.com/repos/plantuml/plantuml/releases/latest | grep "browser_download_url.*jar" | cut -d '"' -f 4)
-          wget -O plantuml.jar "$LATEST_URL"
-          echo "PLANTUML_JAR_PATH=$(pwd)/plantuml.jar" >> $GITHUB_ENV
-          
+          sudo apt-get install -y default-jre-headless graphviz
+          # Устанавливаем последнюю версию PlantUML из GitHub
+          wget -O /usr/local/bin/plantuml.jar https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar
+          echo '#!/bin/bash
+          java -jar /usr/local/bin/plantuml.jar "$@"' > /usr/local/bin/plantuml
+          chmod +x /usr/local/bin/plantuml          
+      
       - name: Check UML files
         run: |
           echo "Files in docs/uml/:"
@@ -41,14 +39,15 @@ jobs:
       - name: Create diagrams directory
         run: mkdir -p docs/diagrams
         
-      - name: Render UML to SVG with latest PlantUML
+      - name: Render UML to SVG
         run: |
           cd docs/uml
-          set +e  # Не прерывать выполнение при ошибках
+          # Продолжать выполнение даже если некоторые диаграммы не рендерятся
+          set +e
           for file in *.puml; do
             if [ -f "$file" ]; then
-              echo "=== Rendering $file with latest PlantUML ==="
-              java -jar "${{ env.PLANTUML_JAR_PATH }}" -tsvg "$file" -o ../diagrams/
+              echo "=== Rendering $file ==="
+              plantuml -tsvg "$file" -o ../diagrams/
               if [ $? -ne 0 ]; then
                 echo "Warning: Failed to render $file, continuing..."
               fi
@@ -70,7 +69,7 @@ jobs:
           if compgen -G "docs/diagrams/*.svg" > /dev/null; then
             echo "Found SVG files, committing..."
             git add docs/diagrams/*.svg
-            git diff --cached --quiet || git commit -m "🤖 Auto-generated UML diagrams (latest PlantUML)"
+            git diff --cached --quiet || git commit -m "🤖 Auto-generated UML diagrams"
             git push
           else
             echo "No SVG files generated"
