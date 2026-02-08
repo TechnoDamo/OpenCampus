@@ -1,0 +1,32 @@
+@startuml
+left to right direction
+
+package Users {
+
+    skinparam actorStyle awesome
+    actor AdministrativeStaff 
+
+}
+note bottom of (Users) 
+Full predefined list of use types is mentioned in 01-actors.puml.
+Here some user groups may be generalised for visual simplicity.
+end note
+
+
+package SchedulingManagement {
+    usecase "Create Timetable" as UC4
+    usecase "Assign Lecturer" as UC5
+    usecase "Assign Classroom" as UC6
+}
+
+note bottom of (SchedulingManagement) 
+Full list of usecases is mentioned in 02-usecases.puml.
+end note
+
+' --- Connections ---
+AdministrativeStaff --> UC4
+AdministrativeStaff --> UC5
+AdministrativeStaff --> UC6
+
+
+@enduml
