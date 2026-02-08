@@ -3,48 +3,51 @@ name: Render UML Diagrams
 on:
   push:
     paths:
-      - "docs/**/*.puml"
+      - "docs/uml/*.puml"
+    branches: [ main, master ]
   pull_request:
     paths:
-      - "docs/**/*.puml"
+      - "docs/uml/*.puml"
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   render:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Install PlantUML
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y plantuml graphviz
-
-      - name: Render diagrams
+          sudo apt-get install -y default-jre graphviz plantuml
+          
+      - name: Create diagrams directory
+        run: mkdir -p docs/diagrams
+        
+      - name: Render UML to SVG
         run: |
-          mkdir -p docs/diagrams
-          find docs/uml -name "*.puml" -exec plantuml -tsvg -o ../diagrams {} \;
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: diagrams
-          path: docs/diagrams/*.svg
-
-      - name: Commit SVG if exists
+          cd docs/uml
+          for file in *.puml; do
+            if [ -f "$file" ]; then
+              echo "Rendering $file..."
+              plantuml -tsvg "$file" -o ../diagrams/
+            fi
+          done
+          
+      - name: Commit and push diagrams
         run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-
+          git config --global user.name 'github-actions'
+          git config --global user.email 'actions@github.com'
+          
+          # Check if there are any SVG files to commit
           if ls docs/diagrams/*.svg 1> /dev/null 2>&1; then
             git add docs/diagrams/*.svg
-            git diff --cached --quiet || git commit -m "Update diagrams"
+            git diff --cached --quiet || git commit -m "🤖 Auto-generated UML diagrams"
             git push
           else
-            echo "No SVG generated"
+            echo "No diagrams generated"
           fi
-
