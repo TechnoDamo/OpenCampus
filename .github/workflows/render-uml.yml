@@ -1,71 +1,28 @@
-name: Render UML Diagrams
+name: UML Render
 
 on:
   push:
-    paths:
-      - "docs/uml/*.puml"
-    branches: [ main, master ]
-  pull_request:
-    paths:
-      - "docs/uml/*.puml"
+    paths: ["docs/uml/*.puml"]
   workflow_dispatch:
-
-permissions:
-  contents: write
 
 jobs:
   render:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Install dependencies
+      - uses: actions/checkout@v4
+      
+      - name: Render with Docker (latest)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y default-jre graphviz plantuml
+          docker run --rm \
+            -v $PWD/docs:/docs \
+            plantuml/plantuml:latest \
+            -tsvg /docs/uml/*.puml -o /docs/diagrams
           
-      - name: Check UML files
+      - name: Auto commit
         run: |
-          echo "Files in docs/uml/:"
-          ls -la docs/uml/
-          
-      - name: Create diagrams directory
-        run: mkdir -p docs/diagrams
-        
-      - name: Render UML to SVG
-        run: |
-          cd docs/uml
-          # Продолжать выполнение даже если некоторые диаграммы не рендерятся
-          set +e
-          for file in *.puml; do
-            if [ -f "$file" ]; then
-              echo "=== Rendering $file ==="
-              plantuml -tsvg "$file" -o ../diagrams/
-              if [ $? -ne 0 ]; then
-                echo "Warning: Failed to render $file, continuing..."
-              fi
-            fi
-          done
-          set -e
-          
-      - name: Check rendered diagrams
-        run: |
-          echo "Rendered files in docs/diagrams/:"
-          ls -la docs/diagrams/ || echo "No diagrams directory"
-          
-      - name: Commit and push diagrams
-        run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'actions@github.com'
-          
-          # Check if there are any SVG files to commit
-          if compgen -G "docs/diagrams/*.svg" > /dev/null; then
-            echo "Found SVG files, committing..."
-            git add docs/diagrams/*.svg
-            git diff --cached --quiet || git commit -m "🤖 Auto-generated UML diagrams"
-            git push
-          else
-            echo "No SVG files generated"
-          fi
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add docs/diagrams/*.svg 2>/dev/null || true
+          git commit -m "🔄 Updated diagrams (auto generated)" || exit 0
+          git push
