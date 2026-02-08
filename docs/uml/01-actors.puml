@@ -14,7 +14,7 @@ package Users {
             actor Lecturer
             actor TeachingAssistant
         }
-        note right of TeachingStaff: Everyone who teaches themselves.
+        note right of TeachingStaff: Everyone who teches themselves.
 
         package AdministrativeStaff {
             actor Principal
@@ -22,7 +22,7 @@ package Users {
             actor DepartmentHead
             actor FacultyStaff
         }
-        note right of AdministrativeStaff: Everyone who works at university but doesn't nesessarily have to teach themselves.
+        note right of AdministrativeStaff: Everyone who works at university but doesn't nesessarily have toteach themselves.
     }
 
     note right of UniversityStaff: Everyone who works at university
