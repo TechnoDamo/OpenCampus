@@ -4,8 +4,11 @@ OpenCampus is an open-source, self-hosted platform for managing university sched
 
 The system is designed as a modular monolith built with Go and PostgreSQL, prioritising reliability, clear architecture, and straightforward deployment in institutional environments.
 
-## Overview
+## Documentation
 
+See `docs/README.md` for the full documentation index.
+
+## Overview
 **You can read README [as a webpage](https://technodamo.github.io/OpenCampus/) (recommended).**
 
 [Project Wiki](https://github.com/TechnoDamo/OpenCampus/wiki)
