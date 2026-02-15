@@ -1,0 +1,321 @@
+Table "staff"."department_assignments" {
+  "id" int [pk, not null]
+  "staff_profile_id" int [not null, ref: < "staff"."staff_profiles"."id"]
+  "department_id" int [not null, ref: < "core"."departments"."id"]
+  "academic_rank_id" int [ref: < "core"."academic_ranks"."id"]
+}
+
+Table "staff"."campus_assignments" {
+  "id" int [pk, not null]
+  "staff_profile_id" int [not null, ref: < "staff"."staff_profiles"."id"]
+  "campus_id" int [not null, ref: < "core"."campuses"."id"]
+}
+
+Table "staff"."faculty_assignments" {
+  "id" int [pk, not null]
+  "staff_profile_id" int [not null, ref: < "staff"."staff_profiles"."id"]
+  "faculty_id" int [not null, ref: < "core"."faculties"."id"]
+}
+
+Table "staff"."staff_positions" {
+  "id" int [pk, not null]
+  "name" varchar(500) [unique, not null]
+  "description" text
+}
+
+Table "staff"."staff_profiles" {
+  "id" int [pk, not null]
+  "user_id" int [not null, ref: < "identities"."users"."id"]
+  "position_id" int [not null, ref: < "staff"."staff_positions"."id"]
+  "first_name" varchar(500) [not null]
+  "last_name" varchar(500) [not null]
+  "birthdate" date [not null]
+}
+
+Table "staff"."course_staff_positions" {
+  "id" int [pk, not null]
+  "name" varchar(500) [unique, not null]
+  "description" text
+}
+
+Table "staff"."teaching_assignments" {
+  "id" int [pk, not null]
+  "staff_profile_id" int [not null, ref: < "staff"."staff_profiles"."id"]
+  "course_offering_id" int [not null, ref: < "academics"."course_offerings"."id"]
+  "course_staff_position_id" int [not null, ref: < "staff"."course_staff_positions"."id"]
+}
+
+Table "academics"."program_enrolments" {
+  "id" int [pk, not null]
+  "academic_year_id" int [not null, ref: < "schedule"."academic_years"."id"]
+  "type_id" int [not null]
+  "status_id" int [not null, ref: < "academics"."enrolment_statuses"."id"]
+  "student_profile_id" int [not null, ref: < "students"."student_profiles"."id"]
+  "program_id" int [not null]
+  "date" date
+}
+
+Table "academics"."course_offerings" {
+  "id" int [pk, not null]
+  "course_id" int [not null, ref: < "academics"."courses"."id"]
+  "name" varchar(500) [unique, not null]
+  "start_term_id" int [not null, ref: < "schedule"."terms"."id"]
+  "end_term_id" int [not null, ref: < "schedule"."terms"."id"]
+}
+
+Table "academics"."tests" {
+  "id" int [pk, not null]
+  "type_id" int [not null, ref: < "academics"."test_types"."id"]
+  "course_offering_id" int [not null, ref: < "academics"."course_offerings"."id"]
+  "name" varchar(500) [unique, not null]
+  "description" text
+}
+
+Table "academics"."submissions" {
+  "id" int [pk, not null]
+  "course_enrolment_id" int [not null, ref: < "academics"."course_enrolments"."id"]
+  "assignment_id" int [not null, ref: < "academics"."assignments"."id"]
+}
+
+Table "academics"."class_types" {
+  "id" int [pk, not null]
+  "name" varchar(500) [unique, not null]
+  "description" text
+}
+
+Table "academics"."test_types" {
+  "id" int [pk, not null]
+  "name" varchar(500) [unique, not null]
+  "description" text
+}
+
+Table "academics"."course_enrolments" {
+  "id" int [pk, not null]
+  "type_id" int [not null]
+  "status_id" int [not null, ref: < "academics"."enrolment_statuses"."id"]
+  "student_profile_id" int [not null, ref: < "students"."student_profiles"."id"]
+  "course_offering_id" int [not null, ref: < "academics"."course_offerings"."id"]
+  "date" date
+}
+
+Table "academics"."assignment_types" {
+  "id" int [pk, not null]
+  "name" varchar(500) [unique, not null]
+  "description" text
+}
+
+Table "academics"."enrolment_statuses" {
+  "id" int [pk, not null]
+  "name" varchar(500) [not null]
+  "description" text
+}
+
+Table "academics"."grades" {
+  "id" int [pk, not null]
+  "course_enrolment_id" int [not null, ref: < "academics"."course_enrolments"."id"]
+  "type_id" int [not null, ref: < "academics"."grade_types"."id"]
+  "class_id" int [ref: < "academics"."classes"."id"]
+  "assignment_id" int [ref: < "academics"."assignments"."id"]
+  "test_id" int [ref: < "academics"."tests"."id"]
+  "value" varchar(500) [not null]
+}
+
+Table "academics"."assignments" {
+  "id" int [pk, not null]
+  "type_id" int [not null, ref: < "academics"."assignment_types"."id"]
+  "name" varchar(500) [not null]
+  "deadline" time
+  "description" text
+}
+
+Table "academics"."grade_types" {
+  "id" int [pk, not null]
+  "name" varchar(500) [unique, not null]
+}
+
+Table "academics"."students_assignments" {
+  "id" int [pk, not null]
+  "course_enrolment_id" int [not null, ref: < "academics"."course_enrolments"."id"]
+  "assignment_id" int [not null, ref: < "academics"."assignments"."id"]
+}
+
+Table "academics"."course_types" {
+  "id" int [pk, not null, ref: < "academics"."courses"."type_id"]
+  "name" varchar(500) [unique, not null]
+  "description" text
+}
+
+Table "academics"."classes" {
+  "id" int [pk, not null]
+  "class_type_id" int [not null, ref: < "academics"."class_types"."id"]
+  "course_offering_id" int [not null, ref: < "academics"."course_offerings"."id"]
+  "description" text
+}
+
+Table "academics"."courses" {
+  "id" int [pk, not null]
+  "type_id" int [not null]
+  "department_id" int [not null]
+  "name" varchar(500) [unique, not null]
+  "description" text
+}
+
+Table "academics"."attendance_statuses" {
+  "id" int [pk, not null]
+  "name" varchar(500) [unique, not null]
+  "description" text
+}
+
+Table "academics"."attendance_records" {
+  "id" int [pk, not null]
+  "class_id" int [not null, ref: < "academics"."classes"."id"]
+  "course_enrolment_id" int [not null, ref: < "academics"."course_enrolments"."id"]
+  "attendance_status_id" int [not null, ref: < "academics"."attendance_statuses"."id"]
+  "excused" boolean
+}
+
+Table "core"."faculties" {
+  "id" int [pk, not null, ref: < "core"."departments"."faculty_id", ref: < "core"."programs"."faculty_id"]
+  "campus_id" int [not null]
+  "name" varchar(500) [unique, not null]
+  "description" text
+}
+
+Table "core"."buildings" {
+  "id" int [pk, not null]
+  "campus_id" int [not null, ref: < "core"."campuses"."id"]
+  "name" varchar(500) [unique, not null]
+  "description" text
+}
+
+Table "core"."campuses" {
+  "id" int [pk, not null, ref: < "core"."faculties"."campus_id"]
+  "name" varchar(500) [unique, not null]
+}
+
+Table "core"."departments" {
+  "id" int [pk, not null, ref: < "academics"."courses"."department_id"]
+  "faculty_id" int [not null]
+  "name" varchar(500) [not null]
+  "description" text
+}
+
+Table "core"."programs" {
+  "id" int [pk, not null, ref: < "academics"."program_enrolments"."program_id"]
+  "faculty_id" int
+  "department_id" int [ref: < "core"."departments"."id"]
+  "type" int [not null]
+  "code" varchar(500) [unique]
+  "name" varchar(500) [unique, not null]
+  "description" text
+}
+
+Table "core"."classroom_reservations" {
+  "id" int [pk, not null]
+  "classroom_id" int [not null, ref: < "core"."classrooms"."id"]
+  "course_offering_id" int [ref: < "academics"."course_offerings"."id"]
+  "start_time" time [not null]
+  "end_time" time [not null]
+  "special_reason" boolean
+  "description" text
+}
+
+Table "core"."program_types" {
+  "id" int [pk, not null, ref: < "core"."programs"."type"]
+  "name" varchar(500) [unique, not null]
+  "description" text
+}
+
+Table "core"."academic_ranks" {
+  "id" int [pk, not null]
+  "name" varchar(500) [unique, not null]
+}
+
+Table "core"."classrooms" {
+  "id" int [pk, not null]
+  "campus_id" int [not null, ref: < "core"."campuses"."id"]
+  "building_id" int [not null, ref: < "core"."buildings"."id"]
+  "capacity" int [not null]
+  "description" text
+}
+
+Table "schedule"."class_schedule" {
+  "id" int [pk, not null]
+  "class_id" int [not null, ref: < "academics"."classes"."id"]
+  "start_time" time [not null]
+  "end_time" time [not null]
+}
+
+Table "schedule"."terms" {
+  "id" int [pk, not null]
+  "faculty_id" int [not null, ref: < "core"."faculties"."id"]
+  "number" int [not null]
+  "name" varchar(500) [unique, not null]
+  "academic_year_id" int [not null, ref: < "schedule"."academic_years"."id"]
+  "start_date" date [not null]
+  "end_date" date [not null]
+  "description" text
+}
+
+Table "schedule"."term_courses" {
+  "id" int [pk, not null]
+  "term_id" int [not null, ref: < "schedule"."terms"."id"]
+  "course_offering_id" int [not null, ref: < "academics"."course_offerings"."id"]
+}
+
+Table "schedule"."academic_years" {
+  "id" int [pk, not null]
+  "year" int [unique, not null]
+}
+
+Table "students"."student_group_types" {
+  "id" int [pk, not null]
+  "name" varchar(500) [unique, not null]
+  "description" text
+}
+
+Table "students"."student_groups" {
+  "id" int [pk, not null]
+  "type_id" int [not null, ref: < "students"."student_group_types"."id"]
+  "name" varchar(500) [unique, not null]
+  "description" text
+  "tags" json
+}
+
+Table "students"."student_types" {
+  "id" int [pk, not null]
+  "name" varchar(500) [unique, not null]
+  "description" text
+}
+
+Table "students"."student_profiles" {
+  "id" int [pk, not null]
+  "user_id" int [not null, ref: < "identities"."users"."id"]
+  "first_name" varchar(500) [not null]
+  "last_name" varchar(500) [not null]
+  "birthdate" date [not null]
+  "type_id" int [not null, ref: < "students"."student_types"."id"]
+}
+
+Table "students"."students_groups" {
+  "id" int [pk, not null]
+  "group_id" int [not null, ref: < "students"."student_groups"."type_id"]
+  "student_id" int [not null, ref: < "students"."student_profiles"."id"]
+}
+
+Table "identities"."roles" {
+  "id" int [pk, not null, ref: < "identities"."user_roles"."role_id"]
+  "role_name" varchar(500) [unique, not null]
+  "role_description" text [unique, not null]
+}
+
+Table "identities"."users" {
+  "id" int [pk, not null, ref: < "identities"."user_roles"."user_id"]
+  "username" varchar(500) [unique, not null]
+}
+
+Table "identities"."user_roles" {
+  "id" int [pk, not null]
+  "user_id" int [not null]
+  "role_id" int [not null]
+}
