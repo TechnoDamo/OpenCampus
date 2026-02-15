@@ -1,6 +1,10 @@
 # Introduction to db architechture
 
 # DB schemas 
+You have to open them as separate image/zoom in.
+
+## General schema
+![](./img/schema.svg)
 
 ## Identities schema
 ![](./img/Identities%20schema.png)
